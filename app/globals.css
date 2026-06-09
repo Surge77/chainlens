@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ChainLens design tokens — dark-first, precision aesthetic */
+/* Argus design tokens — dark-first, precision aesthetic */
 :root {
   --background: #0a0b0d;
   --surface: #14161a;

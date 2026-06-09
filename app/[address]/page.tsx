@@ -15,13 +15,13 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { address } = await params;
   const parsed = parseAddress(address);
-  if (!parsed) return { title: "Wallet not found — ChainLens" };
+  if (!parsed) return { title: "Wallet not found — Argus" };
   const short = truncateAddress(parsed.address);
   return {
-    title: `${short} — ChainLens`,
+    title: `${short} — Argus`,
     description: `Read-only ${parsed.chain} analytics for ${short}.`,
     openGraph: {
-      title: `${short} — ChainLens`,
+      title: `${short} — Argus`,
       description: `Read-only ${parsed.chain} wallet analytics.`,
     },
   };

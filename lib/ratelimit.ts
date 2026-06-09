@@ -14,7 +14,7 @@ function getLimiter(): Ratelimit {
         RATE_LIMIT.requests,
         `${RATE_LIMIT.windowSeconds} s`,
       ),
-      prefix: "chainlens:rl",
+      prefix: "argus:rl",
     });
   }
   return limiter;

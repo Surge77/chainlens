@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for ChainLens
+about: Suggest an idea for Argus
 title: "feat: "
 labels: enhancement
 ---

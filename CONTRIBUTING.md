@@ -1,6 +1,6 @@
-# Contributing to ChainLens
+# Contributing to Argus
 
-Thanks for your interest in improving ChainLens. This guide covers local setup,
+Thanks for your interest in improving Argus. This guide covers local setup,
 conventions, and the pull-request process.
 
 ## Local setup

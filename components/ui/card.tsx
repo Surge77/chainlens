@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** Surface container with the ChainLens 4px-radius, bordered look. */
+/** Surface container with the Argus 4px-radius, bordered look. */
 export function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

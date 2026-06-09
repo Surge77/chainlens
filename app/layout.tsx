@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ChainLens — Multi-Chain Wallet Analytics",
+  title: "Argus — Multi-Chain Wallet Analytics",
   description:
     "Read-only portfolio, token, and transaction analytics across Ethereum, Solana, and Bitcoin. No wallet connection required.",
 };

@@ -39,6 +39,6 @@ export const useWalletStore = create<WalletState>()(
           wallets: state.wallets.map((w) => (w.address === address ? { ...w, label } : w)),
         })),
     }),
-    { name: "chainlens:wallets" },
+    { name: "argus:wallets" },
   ),
 );

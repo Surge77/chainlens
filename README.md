@@ -1,6 +1,6 @@
 <div align="center">
 
-# ChainLens
+# Argus
 
 **Multi-chain wallet analytics — paste an address, see everything.**
 
@@ -16,7 +16,7 @@ and **Bitcoin**. No wallet connection, no private keys, no custody.
 ## Why
 
 Crypto holders who span multiple chains have no single place to see their full financial
-picture without connecting a wallet — which carries real risk. ChainLens is **read-only
+picture without connecting a wallet — which carries real risk. Argus is **read-only
 and address-based**: you paste a public address, it auto-detects the chain, and renders a
 unified dashboard. Nothing is signed, nothing is stored about you.
 
@@ -55,8 +55,8 @@ unified dashboard. Nothing is signed, nothing is stored about you.
 **Prerequisites:** Node.js 20+ and [pnpm](https://pnpm.io) 10+.
 
 ```bash
-git clone https://github.com/Surge77/chainlens.git
-cd chainlens
+git clone https://github.com/Surge77/argus.git
+cd argus
 pnpm install
 cp .env.example .env.local   # then fill in your API keys
 pnpm dev                     # http://localhost:3000
@@ -87,10 +87,10 @@ See **[CONTRIBUTING.md](CONTRIBUTING.md)** for local setup, conventions, and the
 
 ## Security & privacy
 
-ChainLens never asks you to connect a wallet or sign anything. It only reads public
+Argus never asks you to connect a wallet or sign anything. It only reads public
 on-chain data for the address you enter. Addresses are used to key a short-lived cache and
 are never linked to you in logs or analytics.
 
 ## License
 
-[MIT](LICENSE) © ChainLens contributors
+[MIT](LICENSE) © Argus contributors
