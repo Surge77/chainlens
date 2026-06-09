@@ -1,4 +1,3 @@
-import { Alchemy, Network, SortingOrder, AssetTransfersCategory } from "alchemy-sdk";
 import { formatUnits } from "viem";
 
 import {
@@ -7,18 +6,13 @@ import {
   TX_PAGE_SIZE,
 } from "@/lib/constants";
 import { env } from "@/lib/env";
+import { rpcCall } from "@/lib/http";
 import { getPrices, type PriceInfo } from "@/lib/prices";
 import type { TokenHolding, Transaction, WalletOverview } from "@/types";
 
 const { decimals, coingeckoId } = NATIVE_ASSET.ethereum;
 
-let client: Alchemy | null = null;
-function alchemy(): Alchemy {
-  if (!client) {
-    client = new Alchemy({ apiKey: env.alchemyApiKey, network: Network.ETH_MAINNET });
-  }
-  return client;
-}
+const rpcUrl = () => `https://eth-mainnet.g.alchemy.com/v2/${env.alchemyApiKey}`;
 
 export interface RawTokenBalance {
   contractAddress: string;
@@ -105,11 +99,31 @@ export function transformEthereumTransfers(
 
 const MAX_TOKENS = 20;
 
+interface TokenBalancesResult {
+  tokenBalances: { contractAddress: string; tokenBalance: string | null; error: unknown }[];
+}
+interface TokenMetadataResult {
+  name?: string | null;
+  symbol?: string | null;
+  decimals?: number | null;
+  logo?: string | null;
+}
+interface AssetTransfersResult {
+  transfers: {
+    hash: string;
+    from: string | null;
+    to: string | null;
+    value: number | null;
+    asset: string | null;
+    metadata?: { blockTimestamp?: string };
+  }[];
+}
+
 export async function fetchEthereumOverview(address: string): Promise<WalletOverview> {
-  const a = alchemy();
-  const [weiBalance, balances, nativePrices] = await Promise.all([
-    a.core.getBalance(address),
-    a.core.getTokenBalances(address),
+  const url = rpcUrl();
+  const [weiHex, balances, nativePrices] = await Promise.all([
+    rpcCall<string>(url, "eth_getBalance", [address, "latest"]),
+    rpcCall<TokenBalancesResult>(url, "alchemy_getTokenBalances", [address]),
     getPrices([coingeckoId]),
   ]);
 
@@ -118,23 +132,21 @@ export async function fetchEthereumOverview(address: string): Promise<WalletOver
     .slice(0, MAX_TOKENS);
 
   const items: RawTokenBalance[] = await Promise.all(
-    nonZero.map(async (b) => {
-      const metadata = await a.core.getTokenMetadata(b.contractAddress);
-      return {
-        contractAddress: b.contractAddress,
-        rawBalanceHex: b.tokenBalance as string,
-        metadata,
-      };
-    }),
+    nonZero.map(async (b) => ({
+      contractAddress: b.contractAddress,
+      rawBalanceHex: b.tokenBalance as string,
+      metadata: await rpcCall<TokenMetadataResult>(url, "alchemy_getTokenMetadata", [
+        b.contractAddress,
+      ]),
+    })),
   );
 
-  const priceIds = Object.values(ETH_TOKEN_PRICE_IDS);
-  const tokenPrices = await getPrices(priceIds);
+  const tokenPrices = await getPrices(Object.values(ETH_TOKEN_PRICE_IDS));
   const tokens = transformEthereumTokens(items, tokenPrices);
 
   return transformEthereumOverview(
     address,
-    weiBalance.toHexString(),
+    weiHex,
     tokens,
     nativePrices[coingeckoId]?.usd ?? null,
     null,
@@ -142,16 +154,22 @@ export async function fetchEthereumOverview(address: string): Promise<WalletOver
 }
 
 export async function fetchEthereumTransactions(address: string): Promise<Transaction[]> {
-  const a = alchemy();
+  const url = rpcUrl();
   const common = {
-    category: [AssetTransfersCategory.EXTERNAL, AssetTransfersCategory.ERC20],
-    order: SortingOrder.DESCENDING,
-    maxCount: TX_PAGE_SIZE,
+    fromBlock: "0x0",
+    toBlock: "latest",
+    category: ["external", "erc20"],
+    order: "desc",
+    maxCount: "0x" + TX_PAGE_SIZE.toString(16),
     withMetadata: true,
   };
   const [sent, received] = await Promise.all([
-    a.core.getAssetTransfers({ ...common, fromAddress: address }),
-    a.core.getAssetTransfers({ ...common, toAddress: address }),
+    rpcCall<AssetTransfersResult>(url, "alchemy_getAssetTransfers", [
+      { ...common, fromAddress: address },
+    ]),
+    rpcCall<AssetTransfersResult>(url, "alchemy_getAssetTransfers", [
+      { ...common, toAddress: address },
+    ]),
   ]);
   const transfers: RawTransfer[] = [...sent.transfers, ...received.transfers].map((t) => ({
     hash: t.hash,
@@ -159,7 +177,7 @@ export async function fetchEthereumTransactions(address: string): Promise<Transa
     to: t.to,
     value: t.value,
     asset: t.asset,
-    blockTimestamp: (t as { metadata?: { blockTimestamp?: string } }).metadata?.blockTimestamp,
+    blockTimestamp: t.metadata?.blockTimestamp,
   }));
   return transformEthereumTransfers(address, transfers);
 }
